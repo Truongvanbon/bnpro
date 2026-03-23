@@ -28,7 +28,7 @@ const App: React.FC = () => {
   
   // Configuration
   const [timeframe, setTimeframe] = useState<Timeframe>('15m');
-  const [coinCount, setCoinCount] = useState<number>(50);
+  const [coinCount, setCoinCount] = useState<number>(30);
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.NORMAL);
   const [indicators, setIndicators] = useState<IndicatorConfig>(DEFAULT_INDICATORS);
   const [advanced, setAdvanced] = useState<AdvancedSettings>(DEFAULT_ADVANCED);
@@ -81,10 +81,10 @@ const App: React.FC = () => {
     if (openOrders.length >= tradeSettings.maxOpenTrades) return;
     if (openOrders.some(o => o.symbol === signal.symbol && o.timeframe === signal.timeframe)) return;
 
-    // Calculate fixed TP/SL based on PnL % (20% TP, 60% SL of margin)
+    // Calculate fixed TP/SL based on PnL % (40% TP, 60% SL of margin)
     // pnlPctROE = pnlPctPrice * leverage
-    // 20% = pnlPctPrice * leverage => pnlPctPrice = 0.20 / leverage
-    const tpPct = 0.20 / tradeSettings.leverage;
+    // 40% = pnlPctPrice * leverage => pnlPctPrice = 0.40 / leverage
+    const tpPct = 0.40 / tradeSettings.leverage;
     const slPct = 0.60 / tradeSettings.leverage;
 
     const isLong = signal.side === PositionSide.LONG;

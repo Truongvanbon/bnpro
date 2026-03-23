@@ -33,13 +33,21 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders, onCloseOrder, onShowChart
             <p className="text-[10px] text-gray-500 uppercase mb-1">Tổng vị thế (Notional)</p>
             <p className="text-lg font-bold text-white">{totalNotional.toLocaleString()} USDT</p>
           </div>
-          <div className="bg-binance-gray p-4 rounded-xl border border-binance-gray flex flex-col items-center justify-center">
+          <div className={`p-4 rounded-xl border flex flex-col items-center justify-center ${
+            totalPnlUsdt >= 0 
+              ? 'bg-binance-green/10 border-binance-green/20' 
+              : 'bg-binance-red/10 border-binance-red/20'
+          }`}>
             <p className="text-[10px] text-gray-500 uppercase mb-1">Tổng P/L (USDT)</p>
             <p className={`text-lg font-bold ${totalPnlUsdt >= 0 ? 'text-binance-green' : 'text-binance-red'}`}>
-              {totalPnlUsdt >= 0 ? '+' : ''}{totalPnlUsdt.toFixed(2)} USDT
+              {totalPnlUsdt >= 0 ? '+' : ''}{totalPnlUsdt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
             </p>
           </div>
-          <div className="bg-binance-gray p-4 rounded-xl border border-binance-gray flex flex-col items-center justify-center">
+          <div className={`p-4 rounded-xl border flex flex-col items-center justify-center ${
+            totalPnlPct >= 0 
+              ? 'bg-binance-green/10 border-binance-green/20' 
+              : 'bg-binance-red/10 border-binance-red/20'
+          }`}>
             <p className="text-[10px] text-gray-500 uppercase mb-1">Tổng P/L (%)</p>
             <p className={`text-lg font-bold ${totalPnlPct >= 0 ? 'text-binance-green' : 'text-binance-red'}`}>
               {totalPnlPct >= 0 ? '+' : ''}{totalPnlPct.toFixed(2)}%
@@ -125,11 +133,15 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders, onCloseOrder, onShowChart
                 </div>
               </div>
 
-              <div className="flex items-end justify-between bg-[#0b0e11] p-3 rounded-lg border border-binance-gray mb-4">
+              <div className={`flex items-end justify-between p-3 rounded-lg border mb-4 ${
+                order.pnlUsdt >= 0 
+                  ? 'bg-binance-green/10 border-binance-green/20' 
+                  : 'bg-binance-red/10 border-binance-red/20'
+              }`}>
                 <div>
                   <p className="text-[10px] text-gray-500 uppercase mb-1">P/L Ước tính</p>
                   <p className={`text-xl font-bold ${order.pnlUsdt >= 0 ? 'text-binance-green' : 'text-binance-red'}`}>
-                    {order.pnlUsdt >= 0 ? '+' : ''}{order.pnlUsdt.toFixed(2)} USDT
+                    {order.pnlUsdt >= 0 ? '+' : ''}{order.pnlUsdt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
                   </p>
                 </div>
                 <div className="text-right">

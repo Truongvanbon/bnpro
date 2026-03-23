@@ -63,8 +63,8 @@ const ScannerTab: React.FC<ScannerTabProps> = ({
               className="w-full bg-[#0b0e11] border border-binance-gray rounded p-2 text-sm outline-none focus:border-yellow-500"
             >
               <option value={10}>Top 10</option>
+              <option value={30}>Top 30</option>
               <option value={50}>Top 50</option>
-              <option value={100}>Top 100</option>
             </select>
           </div>
 

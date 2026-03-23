@@ -15,13 +15,21 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ history }) => {
       {/* Summary Row */}
       {history.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-binance-gray p-4 rounded-xl border border-binance-gray flex flex-col items-center justify-center">
+          <div className={`p-4 rounded-xl border flex flex-col items-center justify-center ${
+            totalPnlUsdt >= 0 
+              ? 'bg-binance-green/10 border-binance-green/20' 
+              : 'bg-binance-red/10 border-binance-red/20'
+          }`}>
             <p className="text-[10px] text-gray-500 uppercase mb-1">Tổng lợi nhuận (USDT)</p>
             <p className={`text-lg font-bold ${totalPnlUsdt >= 0 ? 'text-binance-green' : 'text-binance-red'}`}>
-              {totalPnlUsdt >= 0 ? '+' : ''}{totalPnlUsdt.toFixed(2)} USDT
+              {totalPnlUsdt >= 0 ? '+' : ''}{totalPnlUsdt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
             </p>
           </div>
-          <div className="bg-binance-gray p-4 rounded-xl border border-binance-gray flex flex-col items-center justify-center">
+          <div className={`p-4 rounded-xl border flex flex-col items-center justify-center ${
+            totalPnlPct >= 0 
+              ? 'bg-binance-green/10 border-binance-green/20' 
+              : 'bg-binance-red/10 border-binance-red/20'
+          }`}>
             <p className="text-[10px] text-gray-500 uppercase mb-1">Tổng P/L (%) tích lũy</p>
             <p className={`text-lg font-bold ${totalPnlPct >= 0 ? 'text-binance-green' : 'text-binance-red'}`}>
               {totalPnlPct >= 0 ? '+' : ''}{totalPnlPct.toFixed(2)}%
@@ -78,12 +86,18 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ history }) => {
                     </span>
                   </td>
                   <td className="px-4 py-4">
-                    <p className={`font-bold ${order.pnlUsdt >= 0 ? 'text-binance-green' : 'text-binance-red'}`}>
-                      {order.pnlUsdt >= 0 ? '+' : ''}{order.pnlUsdt.toFixed(2)} USDT
-                    </p>
-                    <p className={`text-xs ${order.pnlPct >= 0 ? 'text-binance-green' : 'text-binance-red'}`}>
-                      {order.pnlPct >= 0 ? '+' : ''}{order.pnlPct.toFixed(2)}%
-                    </p>
+                    <div className={`inline-block px-3 py-2 rounded-lg border ${
+                      order.pnlUsdt >= 0 
+                        ? 'bg-binance-green/10 border-binance-green/20' 
+                        : 'bg-binance-red/10 border-binance-red/20'
+                    }`}>
+                      <p className={`font-bold text-sm ${order.pnlUsdt >= 0 ? 'text-binance-green' : 'text-binance-red'}`}>
+                        {order.pnlUsdt >= 0 ? '+' : ''}{order.pnlUsdt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
+                      </p>
+                      <p className={`text-[10px] font-medium ${order.pnlPct >= 0 ? 'text-binance-green' : 'text-binance-red'}`}>
+                        {order.pnlPct >= 0 ? '+' : ''}{order.pnlPct.toFixed(2)}%
+                      </p>
+                    </div>
                   </td>
                   <td className="px-4 py-4 text-right">
                     <p className="text-[10px] text-gray-500">{new Date(order.openTime).toLocaleDateString()}</p>

@@ -30,32 +30,54 @@ export const evaluateSignal = (
   let isLong = true;
   let isShort = true;
 
+  // Volume Filter (Clean Signal Confirmation)
+  const volumes = klines.map(k => k.v);
+  const avgVol = volumes.slice(-21, -1).reduce((a, b) => a + b, 0) / 20;
+  const currentVol = volumes[lastIdx];
+  const volSpike = currentVol > avgVol * 1.5;
+  
+  if (!volSpike) {
+    // Optional: Reduce score if no volume spike, or return null for "cleanest" signals
+    // For now, let's just reduce score to ensure we only get high-conviction trades
+    score -= 15;
+  } else {
+    score += 15;
+    reasons.push('Bùng nổ khối lượng (Vol > 1.5x Avg)');
+  }
+
   // EMA 20/50
   if (indicators.ema20_50) {
     const lEma20 = ema20[ema20.length - 1];
     const lEma50 = ema50[ema50.length - 1];
+    const pEma20 = ema20[ema20.length - 2];
+    const pEma50 = ema50[ema50.length - 2];
+
+    // Crossover logic for cleaner entries
+    const isCrossUp = pEma20 <= pEma50 && lEma20 > lEma50;
+    const isCrossDown = pEma20 >= pEma50 && lEma20 < lEma50;
+
     if (lEma20 > lEma50) {
-      score += 10;
+      score += isCrossUp ? 25 : 10; // Bonus for fresh crossover
       isShort = false;
-      reasons.push('EMA20 > EMA50');
+      reasons.push(isCrossUp ? 'Giao cắt EMA20/50 (Mới)' : 'EMA20 > EMA50');
     } else {
-      score += 10;
+      score += isCrossDown ? 25 : 10;
       isLong = false;
-      reasons.push('EMA20 < EMA50');
+      reasons.push(isCrossDown ? 'Giao cắt EMA20/50 (Mới)' : 'EMA20 < EMA50');
     }
   }
 
-  // EMA 200
+  // EMA 200 (Hard Trend Filter)
   if (indicators.ema200) {
     const lEma200 = ema200[ema200.length - 1];
     if (currentPrice > lEma200) {
-      score += 10;
-      isShort = false;
-      reasons.push('Giá > EMA200');
+      score += 15;
+      isShort = false; // Don't short above EMA200 for clean signals
+      reasons.push('Giá > EMA200 (Trend Tăng)');
     } else {
-      score += 10;
-      isLong = false;
-      reasons.push('Giá < EMA200');
+      score += 15;
+      isLong = false; // Don't long below EMA200
+      reasons.push('Giá < EMA200 (Trend Giảm)');
     }
   }
 
@@ -63,14 +85,18 @@ export const evaluateSignal = (
   if (indicators.rsi14) {
     const lRsi = rsi[rsi.length - 1];
     const pRsi = rsi[rsi.length - 2];
+    
+    // Pullback/Momentum logic
     if (lRsi > 50 && lRsi > pRsi) {
-      score += 10;
+      const isPullback = pRsi < 45 && lRsi >= 50; // RSI crossing up from neutral/oversold
+      score += isPullback ? 20 : 10;
       isShort = false;
-      reasons.push('RSI > 50 & Đang tăng');
+      reasons.push(isPullback ? 'RSI Pullback & Phá vỡ 50' : 'RSI > 50 & Đang tăng');
     } else if (lRsi < 50 && lRsi < pRsi) {
-      score += 10;
+      const isPullback = pRsi > 55 && lRsi <= 50;
+      score += isPullback ? 20 : 10;
       isLong = false;
-      reasons.push('RSI < 50 & Đang giảm');
+      reasons.push(isPullback ? 'RSI Pullback & Phá vỡ 50' : 'RSI < 50 & Đang giảm');
     } else {
       isLong = false;
       isShort = false;
@@ -81,14 +107,22 @@ export const evaluateSignal = (
   if (indicators.macd) {
     const lHist = macdHist[macdHist.length - 1] || 0;
     const pHist = macdHist[macdHist.length - 2] || 0;
+    const lMacd = macd[macd.length - 1] || 0;
+    const lSignal = macdSignal[macdSignal.length - 1] || 0;
+    const pMacd = macd[macd.length - 2] || 0;
+    const pSignal = macdSignal[macdSignal.length - 2] || 0;
+
+    const isCrossUp = pMacd <= pSignal && lMacd > lSignal;
+    const isCrossDown = pMacd >= pSignal && lMacd < lSignal;
+
     if (lHist > 0) {
-      score += (lHist > pHist) ? 15 : 5;
+      score += isCrossUp ? 25 : 10;
       isShort = false;
-      reasons.push('MACD Histogram Dương');
+      reasons.push(isCrossUp ? 'Giao cắt MACD (Mới)' : 'MACD Histogram Dương');
     } else if (lHist < 0) {
-      score += (lHist < pHist) ? 15 : 5;
+      score += isCrossDown ? 25 : 10;
       isLong = false;
-      reasons.push('MACD Histogram Âm');
+      reasons.push(isCrossDown ? 'Giao cắt MACD (Mới)' : 'MACD Histogram Âm');
     }
   }
 
